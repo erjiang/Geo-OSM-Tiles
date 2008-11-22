@@ -10,20 +10,20 @@ use File::Basename;
 use Getopt::Long;
 
 our $usage = qq{Usage: 
-   $0 --longitude=d --latitude=d --zoom=z
-   $0 --link=url [--longitude=d] [--latitude=d] [--zoom=z]
+   $0 --latitude=d --longitude=d --zoom=z
+   $0 --link=url [--latitude=d] [--longitude=d] [--zoom=z]
 };
 
 our %opt = (
-    longitude => undef,
     latitude => undef,
+    longitude => undef,
     zoom => undef,
     link => undef,
 );
 
 die "$usage\n"
     unless GetOptions(\%opt,
-                      "longitude=s", "latitude=s", "zoom=i", "link=s") &&
+                      "latitude=s", "longitude=s", "zoom=i", "link=s") &&
            @ARGV == 0;
 
 sub downloadtile;
@@ -40,8 +40,8 @@ if ($opt{link}) {
 
 our $lwpua = LWP::UserAgent->new;
 
-our $lon = $opt{longitude};
 our $lat = $opt{latitude};
+our $lon = $opt{longitude};
 our $zoom = $opt{zoom};
 our $tilex = lon2tilex($lon, $zoom);
 our $tiley = lat2tiley($lat, $zoom);
