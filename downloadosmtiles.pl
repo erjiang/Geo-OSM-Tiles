@@ -7,14 +7,14 @@ use Geo::OSM::Tiles qw( :all );
 use LWP::UserAgent;
 use File::Path;
 use File::Basename;
+use Cwd qw(cwd);
 use Getopt::Long;
 
-our $baseurl = "http://tile.openstreetmap.org";
 our $linkrgoffs = 350.0;
 
 our $usage = qq{Usage: 
-   $0 --latitude=d[:d] --longitude=d[:d] --zoom=z[:z]
-   $0 --link=url [--latitude=d[:d]] [--longitude=d[:d]] [--zoom=z[:z]]
+   $0 --latitude=d[:d] --longitude=d[:d] --zoom=z[:z] [--baseurl=url] [--destdir=dir]
+   $0 --link=url [--latitude=d[:d]] [--longitude=d[:d]] [--zoom=z[:z]] [--baseurl=url] [--destdir=dir]
 };
 
 our %opt = (
@@ -22,11 +22,14 @@ our %opt = (
     longitude => undef,
     zoom => undef,
     link => undef,
+    baseurl => "http://tile.openstreetmap.org",
+    destdir => cwd,
 );
 
 die "$usage\n"
     unless GetOptions(\%opt,
-                      "latitude=s", "longitude=s", "zoom=s", "link=s") &&
+                      "latitude=s", "longitude=s", "zoom=s", "link=s",
+                      "baseurl=s", "destdir=s") &&
            @ARGV == 0;
 
 sub parserealopt;
@@ -55,6 +58,8 @@ $lwpua->env_proxy;
 our ($latmin, $latmax) = parserealopt("latitude");
 our ($lonmin, $lonmax) = parserealopt("longitude");
 our ($zoommin, $zoommax) = parseintopt("zoom");
+our $baseurl = $opt{baseurl};
+our $destdir = $opt{destdir};
 
 for my $zoom ($zoommin..$zoommax) {
     my $txmin = lon2tilex($lonmin, $zoom);
@@ -111,10 +116,11 @@ sub downloadtile
 {
     my ($lwpua, $tilex, $tiley, $zoom) = @_;
     my $path = tile2path($tilex, $tiley, $zoom);
+    my $url = "$baseurl/$path";
+    my $fname = "$destdir/$path";
 
-    mkpath(dirname($path));
-    my $res = $lwpua->get("$baseurl/$path", 
-			  ':content_file' => $path);
+    mkpath(dirname($fname));
+    my $res = $lwpua->get($url, ':content_file' => $fname);
     die $res->status_line
 	unless $res->is_success;
 }
@@ -147,11 +153,6 @@ this is considered a feature for C<--latitude> and C<--zoom>, it means
 that it is impossible for a range in the C<--longitude> argument to
 cross the 180 degree line.  A command line option like
 C<--longitude=179.5:-179.5> will not work as one should expect.
-
-=item *
-
-By now, only Mapnik tiles are supported.  The base URL
-L<http://tile.openstreetmap.org/> is hard coded.
 
 =back
 
