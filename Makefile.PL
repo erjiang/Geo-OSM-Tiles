@@ -6,5 +6,6 @@ WriteMakefile(
     ABSTRACT_FROM	=> 'lib/Geo/OSM/Tiles.pm', 
     AUTHOR		=> 'Rolf Krahl <rolf@rotkraut.de>', 
     VERSION_FROM	=> 'lib/Geo/OSM/Tiles.pm', 
-    PREREQ_PM		=> {}, 
+    PREREQ_PM		=> { LWP => 0, }, 
+    EXE_FILES		=> [ 'downloadosmtiles.pl' ],
 );
