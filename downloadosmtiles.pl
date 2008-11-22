@@ -46,13 +46,13 @@ our $zoom = $opt{zoom};
 our $tilex = lon2tilex($lon, $zoom);
 our $tiley = lat2tiley($lat, $zoom);
 
-downloadtile($tilex, $tiley, $zoom);
+downloadtile($lwpua, $tilex, $tiley, $zoom);
 
 
 
 sub downloadtile
 {
-    my ($tilex, $tiley, $zoom) = @_;
+    my ($lwpua, $tilex, $tiley, $zoom) = @_;
     my $path = tile2path($tilex, $tiley, $zoom);
 
     mkpath(dirname($path));
