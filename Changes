@@ -1,0 +1,6 @@
+Revision history for Perl extension Geo::OSM::Tiles.
+
+0.01  Sat Nov 22 16:04:10 2008
+	- original version; created by h2xs 1.23 with options
+		-X -A -n Geo::OSM::Tiles
+
