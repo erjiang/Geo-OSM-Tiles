@@ -50,6 +50,7 @@ if ($opt{link}) {
 }
 
 our $lwpua = LWP::UserAgent->new;
+$lwpua->env_proxy;
 
 our ($latmin, $latmax) = parserealopt("latitude");
 our ($lonmin, $lonmax) = parserealopt("longitude");
