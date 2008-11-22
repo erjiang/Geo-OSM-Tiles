@@ -10,6 +10,7 @@ use File::Basename;
 use Getopt::Long;
 
 our $baseurl = "http://tile.openstreetmap.org";
+our $linkrgoffs = 350.0;
 
 our $usage = qq{Usage: 
    $0 --latitude=d[:d] --longitude=d[:d] --zoom=z[:z]
@@ -35,9 +36,17 @@ sub downloadtile;
 if ($opt{link}) {
     die "Invalid link: $opt{link}\n"
 	unless $opt{link} =~ /^http:\/\/.*\/\?lat=(-?[0-9]+\.[0-9]+)\&lon=(-?[0-9]+\.[0-9]+)\&zoom=([0-9]+)/;
-    $opt{latitude} ||= $1;
-    $opt{longitude} ||= $2;
-    $opt{zoom} ||= $3;
+    my $lat = $1;
+    my $lon = $2;
+    my $zoom = $3;
+    my $offs = $linkrgoffs / 2**$zoom;
+
+    $opt{latitude} = [ $lat - $offs, $lat + $offs ]
+	unless defined($opt{latitude});
+    $opt{longitude} = [ $lon - $offs, $lon + $offs ]
+	unless defined($opt{longitude});
+    $opt{zoom} = $zoom
+	unless defined($opt{zoom});
 }
 
 our $lwpua = LWP::UserAgent->new;
@@ -64,24 +73,36 @@ for my $zoom ($zoommin..$zoommax) {
 sub parserealopt
 {
     my ($optname) = @_;
-    die "Invalid $optname: $opt{$optname}\n"
-	unless $opt{$optname} =~ /^(-?\d+\.\d+)(?::(-?\d+\.\d+))?$/;
-    my ($min, $max) = ($1, $2);
-    $max = $min unless defined($max);
 
-    return ($min, $max);
+    if (ref($opt{$optname})) {
+	return @{$opt{$optname}};
+    }
+    else {
+	die "Invalid $optname: $opt{$optname}\n"
+	    unless $opt{$optname} =~ /^(-?\d+\.\d+)(?::(-?\d+\.\d+))?$/;
+	my ($min, $max) = ($1, $2);
+	$max = $min unless defined($max);
+
+	return ($min, $max);
+    }
 }
 
 
 sub parseintopt
 {
     my ($optname) = @_;
-    die "Invalid $optname: $opt{$optname}\n"
-	unless $opt{$optname} =~ /^(\d+)(?::(\d+))?$/;
-    my ($min, $max) = ($1, $2);
-    $max = $min unless defined($max);
 
-    return ($min, $max);
+    if (ref($opt{$optname})) {
+	return @{$opt{$optname}};
+    }
+    else {
+	die "Invalid $optname: $opt{$optname}\n"
+	    unless $opt{$optname} =~ /^(\d+)(?::(\d+))?$/;
+	my ($min, $max) = ($1, $2);
+	$max = $min unless defined($max);
+
+	return ($min, $max);
+    }
 }
 
 
