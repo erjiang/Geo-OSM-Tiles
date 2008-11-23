@@ -38,7 +38,7 @@ sub downloadtile;
 
 if ($opt{link}) {
     die "Invalid link: $opt{link}\n"
-	unless $opt{link} =~ /^http:\/\/.*\/\?lat=(-?[0-9]+\.[0-9]+)\&lon=(-?[0-9]+\.[0-9]+)\&zoom=([0-9]+)/;
+	unless $opt{link} =~ /^http:\/\/.*\/\?lat=(-?[0-9]+(?:\.[0-9]+)?)\&lon=(-?[0-9]+(?:\.[0-9]+)?)\&zoom=([0-9]+)/;
     my $lat = $1;
     my $lon = $2;
     my $zoom = $3;
