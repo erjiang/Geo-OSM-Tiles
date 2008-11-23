@@ -44,16 +44,15 @@ if ($opt{link}) {
     my $zoom = $3;
     my $offs = $linkrgoffs / 2**$zoom;
 
-{
-    $latmin = $lat - $offs;
+    my $latmin = $lat - $offs;
     $latmin = -85.0511 if $latmin < -85.0511;
-    $latmax = $lat + $offs;
+    my $latmax = $lat + $offs;
     $latmax = 85.0511 if $latmax > 85.0511;
     $opt{latitude} = [ $latmin, $latmax ]
 	unless defined($opt{latitude});
-    $lonmin = $lon - $offs;
+    my $lonmin = $lon - $offs;
     $lonmin = -180.0 if $lonmin < -180.0;
-    $lonmax = $lon + $offs;
+    my $lonmax = $lon + $offs;
     $lonmax = 179.9997 if $lonmax > 179.9997;
     $opt{longitude} = [ $lonmin, $lonmax ]
 	unless defined($opt{longitude});
