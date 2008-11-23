@@ -1,6 +1,7 @@
 Changes
-Makefile.PL
 MANIFEST
+Makefile.PL
 README
-t/Geo-OSM-Tiles.t
+downloadosmtiles.pl
 lib/Geo/OSM/Tiles.pm
+t/Geo-OSM-Tiles.t
