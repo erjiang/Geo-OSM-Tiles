@@ -1,16 +1,23 @@
 Geo-OSM-Tiles version 0.01
 ==========================
 
-The README is used to introduce the module and provide instructions on
-how to install the module, any machine dependencies it may have (for
-example C compilers and installed libraries) and any other information
-that should be provided before the module is installed.
+Geo::OSM::Tiles - Calculate tile numbers for OpenStreetMap
 
-A README file is required for CPAN modules since CPAN extracts the
-README file from a module distribution so that people browsing the
-archive can use it get an idea of the modules uses. It is usually a
-good idea to provide version information here so that people can
-decide whether fixes for the module are worth downloading.
+This module provides functions for calculating the path to a map tile
+at OpenStreetMap out of geographic coordinates.  The path of a tile at
+OSM has the form C<$zoom/$tilex/$tiley.png>.
+
+It contains the script downloadosmtiles.pl that downloads all map
+tiles from an OpenStreetMap tile server for some geographic region in
+a range of zoom levels.
+
+
+PREREQUISITES
+
+This module requires these other modules and libraries:
+
+   LWP
+
 
 INSTALLATION
 
@@ -21,15 +28,8 @@ To install this module type the following:
    make test
    make install
 
-DEPENDENCIES
-
-This module requires these other modules and libraries:
-
-  blah blah blah
 
 COPYRIGHT AND LICENCE
-
-Put the correct copyright and licence information here.
 
 Copyright (C) 2008 by Rolf Krahl
 
