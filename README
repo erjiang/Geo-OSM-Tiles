@@ -4,8 +4,7 @@ Geo-OSM-Tiles version 0.01
 Geo::OSM::Tiles - Calculate tile numbers for OpenStreetMap
 
 This module provides functions for calculating the path to a map tile
-at OpenStreetMap out of geographic coordinates.  The path of a tile at
-OSM has the form C<$zoom/$tilex/$tiley.png>.
+at OpenStreetMap out of geographic coordinates.
 
 It contains the script downloadosmtiles.pl that downloads all map
 tiles from an OpenStreetMap tile server for some geographic region in
