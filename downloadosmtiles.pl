@@ -150,8 +150,7 @@ of the tiles are stored in a directory tree that mirrors the paths
 from the server.
 
 A bounding box of geographic coordinates and a range of zoom levels
-must be selected by command line options.  The script will download
-all map tiles within this bounding box for the given zoom levels.
+must be selected by command line options.
 
 =head1 COMMAND LINE OPTIONS
 
@@ -163,19 +162,19 @@ C<--link> must be specified.
 
 =head2 C<--latitude=latmin[:latmax]>
 
-Selects latitude of the bounding box of coordinates to download.  May
-be one single real value or two real values separated by a colon in
-the range C<-85.0511..85.0511>.  If given only one value, just the
-tile (or column of tiles) at this latitude will be downloaded.
+Selects the latitude of the bounding box of coordinates to download.
+May be one single real value or two real values separated by a colon
+in the range C<-85.0511..85.0511>.  If given only one value, just the
+tile (or row of tiles) at this latitude will be downloaded.
 
 Default: none
 
 =head2 C<--longitude=lonmin[:lonmax]>
 
-Selects longitude of the bounding box of coordinates to download.  May
-be one single real value or two real values separated by a colon in
-the range C<-180.0..180.0>.  If given only one value, just the tile
-(or row of tiles) at this longitude will be downloaded.
+Selects the longitude of the bounding box of coordinates to download.
+May be one single real value or two real values separated by a colon
+in the range C<-180.0..180.0>.  If given only one value, just the tile
+(or column of tiles) at this longitude will be downloaded.
 
 Default: none
 
@@ -222,7 +221,7 @@ Default: The current working directory.
 =head1 EXAMPLE
 
 Select the region of interest in OSM's slippy map and follow the
-permalink in the lower left of the window.  We assume this permalink
+permalink in the lower left of the window.  Lets this permalink
 to be
 L<http://www.openstreetmap.org/?lat=49.5782&lon=11.0076&zoom=12&layers=B000FTF>.
 Then
@@ -249,7 +248,7 @@ The bounding box selected by the C<--link> command line option does
 not always correspond to the current view in the slippy map.  The
 problem is that the permalink from the slippy map only contains one
 position and not the bounds of the current view.  The actual view of
-the slippy map depends on many factor, including the size of the
+the slippy map depends on many factors, including the size of the
 browser window.  Thus, there is not much that can be done about this
 issue.
 
@@ -257,9 +256,9 @@ issue.
 
 The script lacks a progress indicator.  Selecting a large bounding box
 or a large range of zoom levels may result in a large number of tiles
-to be downloaded.  This may easily take half an hour or longer to
-download.  Since there is no progress indicator, the script seems to
-hang while it is actually working fine.
+to be downloaded.  This may easily take half an hour or longer.  Since
+there is no progress indicator, the script seems to hang while it is
+actually working fine.
 
 =back
 

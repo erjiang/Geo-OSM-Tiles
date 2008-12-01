@@ -25,7 +25,8 @@ Geo::OSM::Tiles - Calculate tile numbers for OpenStreetMap
 
 This module provides functions for calculating the path to a map tile
 at OpenStreetMap out of geographic coordinates.  The path of a tile at
-OSM has the form C<$zoom/$tilex/$tiley.png>.
+OSM has the form C<$zoom/$tilex/$tiley.png>.  The numbering scheme is
+documented in the OSM wiki, see the link below.
 
 =cut
 
@@ -48,7 +49,7 @@ our @EXPORT = qw();
 
 Returns C<$tilex> for the tile at longitude C<$lon> and zoom level
 C<$zoom>.  The longitude must be in the range C<-180.0 <= $lon < 180.0>.
-The zoom level must be an integer.
+The zoom level must be a non-negative integer.
 
 =cut
 
@@ -63,7 +64,7 @@ sub lon2tilex
 
 Returns C<$tiley> for the tile at latitude C<$lat> and zoom level
 C<$zoom>.  The latitude must be in the range C<-85.0511 <= $lat <= 85.0511>.
-The zoom level must be an integer.
+The zoom level must be a non-negative integer.
 
 =cut
 
