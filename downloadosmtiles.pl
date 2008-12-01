@@ -221,7 +221,7 @@ Default: The current working directory.
 =head1 EXAMPLE
 
 Select the region of interest in OSM's slippy map and follow the
-permalink in the lower left of the window.  Lets this permalink
+permalink in the lower left of the window.  Lets assume this permalink
 to be
 L<http://www.openstreetmap.org/?lat=49.5782&lon=11.0076&zoom=12&layers=B000FTF>.
 Then
@@ -229,6 +229,23 @@ Then
   downloadosmtiles.pl --link='http://www.openstreetmap.org/?lat=49.5782&lon=11.0076&zoom=12&layers=B000FTF' --zoom=5:18
 
 will download all tiles from zoom level 5 to 18 for this region.
+
+=head1 ENVIRONMENT
+
+=over
+
+=item http_proxy
+
+=item ftp_proxy
+
+=item xxx_proxy
+
+=item no_proxy
+
+These environment variables can be set to enable communication through
+a proxy server.  This is implemented by L<LWP::UserAgent>.
+
+=back
 
 =head1 BUGS
 
