@@ -1,6 +1,6 @@
 package Geo::OSM::Tiles;
 
-use 5.008008;
+use 5.006001;
 use strict;
 use warnings;
 use Math::Trig;
