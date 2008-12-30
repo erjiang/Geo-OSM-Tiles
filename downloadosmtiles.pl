@@ -13,8 +13,8 @@ use Getopt::Long;
 our $linkrgoffs = 350.0;
 
 our $usage = qq{Usage: 
-   $0 --latitude=d[:d] --longitude=d[:d] --zoom=z[:z] [--baseurl=url] [--destdir=dir]
-   $0 --link=url [--latitude=d[:d]] [--longitude=d[:d]] [--zoom=z[:z]] [--baseurl=url] [--destdir=dir]
+   $0 --latitude=d[:d] --longitude=d[:d] --zoom=z[:z] [--quiet] [--baseurl=url] [--destdir=dir]
+   $0 --link=url [--latitude=d[:d]] [--longitude=d[:d]] [--zoom=z[:z]] [--quiet] [--baseurl=url] [--destdir=dir]
 };
 
 our %opt = (
@@ -22,6 +22,7 @@ our %opt = (
     longitude => undef,
     zoom => undef,
     link => undef,
+    quiet => undef,
     baseurl => "http://tile.openstreetmap.org",
     destdir => cwd,
 );
@@ -29,7 +30,7 @@ our %opt = (
 die "$usage\n"
     unless GetOptions(\%opt,
                       "latitude=s", "longitude=s", "zoom=s", "link=s",
-                      "baseurl=s", "destdir=s") &&
+                      "quiet", "baseurl=s", "destdir=s") &&
            @ARGV == 0;
 
 sub parserealopt;
@@ -67,12 +68,20 @@ our $baseurl = $opt{baseurl};
 our $destdir = $opt{destdir};
 
 for my $zoom ($zoommin..$zoommax) {
+
     my $txmin = lon2tilex($lonmin, $zoom);
     my $txmax = lon2tilex($lonmax, $zoom);
     # Note that y=0 is near lat=+85.0511 and y=max is near
     # lat=-85.0511, so lat2tiley is monotonically decreasing.
     my $tymin = lat2tiley($latmax, $zoom);
     my $tymax = lat2tiley($latmin, $zoom);
+
+    my $ntx = $txmax - $txmin + 1;
+    my $nty = $tymax - $tymin + 1;
+    printf "Download %d (%d x %d) tiles for zoom level %d ...\n",
+	$ntx*$nty, $ntx, $nty, $zoom
+	unless $opt{quiet};
+
     for my $tx ($txmin..$txmax) {
 	for my $ty ($tymin..$tymax) {
 	    downloadtile($lwpua, $tx, $ty, $zoom);
@@ -185,6 +194,9 @@ be one single integer value or two integer values separated by a
 colon.  OpenStreetMap supports zoom levels in the range C<0..18>.
 (This depends on the base URL and is not enforced by this script.)
 
+Note that the number of tiles to download grows by a factor of up to
+four with each zoom level.
+
 Default: none
 
 =head2 C<--link=url>
@@ -217,6 +229,11 @@ The directory where the tiles will be stored.  The PNG files will be
 stored as C<dir/zoom/x/y.png>.
 
 Default: The current working directory.
+
+=head2 C<--quiet>
+
+Do not write any diagnostic messages.  Only fatal errors will be
+reported.
 
 =head1 EXAMPLE
 
@@ -268,14 +285,6 @@ position and not the bounds of the current view.  The actual view of
 the slippy map depends on many factors, including the size of the
 browser window.  Thus, there is not much that can be done about this
 issue.
-
-=item *
-
-The script lacks a progress indicator.  Selecting a large bounding box
-or a large range of zoom levels may result in a large number of tiles
-to be downloaded.  This may easily take half an hour or longer.  Since
-there is no progress indicator, the script seems to hang while it is
-actually working fine.
 
 =back
 
