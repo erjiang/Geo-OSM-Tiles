@@ -1,6 +1,9 @@
+
+---------- Release 0.02 ----------
+
 2008-12-30  Rolf Krahl
 
-	* Changes, MANIFEST.SKIP, lib/Geo/OSM/Tiles.pm: Release 0.02
+	* ChangeLog, Changes, MANIFEST.SKIP, lib/Geo/OSM/Tiles.pm: Release 0.02
 
 	* MANIFEST: t/downloadosmtiles.t in MANIFEST.
 
