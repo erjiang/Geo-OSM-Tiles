@@ -95,6 +95,9 @@ sub parserealopt
 {
     my ($optname) = @_;
 
+    die "$optname must be specified in the command line.\n"
+	unless defined($opt{$optname});
+
     if (ref($opt{$optname})) {
 	return @{$opt{$optname}};
     }
@@ -112,6 +115,9 @@ sub parserealopt
 sub parseintopt
 {
     my ($optname) = @_;
+
+    die "$optname must be specified in the command line.\n"
+	unless defined($opt{$optname});
 
     if (ref($opt{$optname})) {
 	return @{$opt{$optname}};
