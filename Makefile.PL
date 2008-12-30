@@ -6,6 +6,7 @@ WriteMakefile(
     ABSTRACT_FROM    => 'lib/Geo/OSM/Tiles.pm', 
     AUTHOR	     => 'Rolf Krahl <rolf@rotkraut.de>', 
     VERSION_FROM     => 'lib/Geo/OSM/Tiles.pm', 
+    LICENSE	     => "perl", 
     PREREQ_PM	     => { 
 	# Needed by the module Geo::OSM::Tiles
 	Math::Trig     => 0,
