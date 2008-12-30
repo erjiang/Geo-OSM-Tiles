@@ -103,7 +103,7 @@ sub parserealopt
     }
     else {
 	die "Invalid $optname: $opt{$optname}\n"
-	    unless $opt{$optname} =~ /^(-?\d+\.(?:\.\d+)?)(?::(-?\d+\.(?:\.\d+)?))?$/;
+	    unless $opt{$optname} =~ /^(-?\d+(?:\.\d+)?)(?::(-?\d+(?:\.\d+)?))?$/;
 	my ($min, $max) = ($1, $2);
 	$max = $min unless defined($max);
 
