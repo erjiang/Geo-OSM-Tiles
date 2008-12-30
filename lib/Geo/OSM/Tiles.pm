@@ -32,7 +32,7 @@ documented in the OSM wiki, see the link below.
 
 require Exporter;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 our @ISA = qw(Exporter);
 

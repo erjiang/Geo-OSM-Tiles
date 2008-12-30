@@ -1,5 +1,14 @@
 Revision history for Perl extension Geo::OSM::Tiles.
 
-0.01  Sun Nov 30 18:26:30 CET 2008
+0.02  2008-12-30
+	- downloadosmtiles.pl: fixes in parsing command line options.
+	- downloadosmtiles.pl: diagnostic messages about how many
+	  tiles are to be downloaded.  May be switched off by new
+	  command line option --quiet.
+	- More tests.
+	- Cleanup in dependencies.
+	- Some documentation fixes.
+
+0.01  2008-11-30
 	- initial version.
 
