@@ -7,6 +7,7 @@ use Geo::OSM::Tiles qw( :all );
 use LWP::UserAgent;
 use File::Path;
 use File::Basename;
+use File::Spec;
 use Cwd qw(cwd);
 use Getopt::Long;
 
@@ -138,7 +139,8 @@ sub downloadtile
     my ($lwpua, $tilex, $tiley, $zoom) = @_;
     my $path = tile2path($tilex, $tiley, $zoom);
     my $url = "$baseurl/$path";
-    my $fname = "$destdir/$path";
+    my @pathcomp = split /\//, $path;
+    my $fname = File::Spec->catfile($destdir, @pathcomp);
 
     mkpath(dirname($fname));
     my $res = $lwpua->get($url, ':content_file' => $fname);

@@ -20,6 +20,7 @@ else {
 
 use Cwd qw(abs_path);
 use File::Temp qw(tempdir);
+use File::Spec;
 use File::Find;
 
 # you may switch off $cleanup for debugging this test script.
@@ -78,11 +79,11 @@ our $dubiouscount;
 	is($res, 0, "return value from downloadosmtiles.pl");
 
 	$pngcount = 0;
-	find(\&countpng, "$testdir/$zoom");
+	find(\&countpng, File::Spec->catdir($testdir, $zoom));
 	is($pngcount, 1, "number of dowloaded tiles");
 
 	$dubiouscount = 0;
-	find({ wanted => \&cleantmp, bydepth => 1, no_chdir => 1 }, "$testdir")
+	find({ wanted => \&cleantmp, bydepth => 1, no_chdir => 1 }, $testdir)
 	    if $cleanup;
 	ok(!$dubiouscount, "dubious files found");
     }
@@ -95,29 +96,29 @@ our $dubiouscount;
     my $link = 'http://openstreetmap.org/?lat=14.692&lon=-17.448&zoom=11&layers=B000FTF';
 
     my $res = system($downloadosmtiles, 
-			 "--link=$link", "--zoom=11:13",
-			 "--quiet", "--destdir=$testdir");
+		     "--link=$link", "--zoom=11:13",
+		     "--quiet", "--destdir=$testdir");
     is($res, 0, "return value from downloadosmtiles.pl");
 
     $pngcount = 0;
-    find(\&countpng, "$testdir/11");
+    find(\&countpng, File::Spec->catdir($testdir, "11"));
     cmp_ok($pngcount, '>=', 9, "number of dowloaded tiles");
     cmp_ok($pngcount, '<=', 16, "number of dowloaded tiles");
 
     my $oldcount = $pngcount;
     $pngcount = 0;
-    find(\&countpng, "$testdir/12");
+    find(\&countpng, File::Spec->catdir($testdir, "12"));
     cmp_ok($pngcount, '>=', $oldcount, "number of dowloaded tiles");
     cmp_ok($pngcount, '<=', 4*$oldcount, "number of dowloaded tiles");
 
     $oldcount = $pngcount;
     $pngcount = 0;
-    find(\&countpng, "$testdir/13");
+    find(\&countpng, File::Spec->catdir($testdir, "13"));
     cmp_ok($pngcount, '>=', $oldcount, "number of dowloaded tiles");
     cmp_ok($pngcount, '<=', 4*$oldcount, "number of dowloaded tiles");
 
     $dubiouscount = 0;
-    find({ wanted => \&cleantmp, bydepth => 1, no_chdir => 1 }, "$testdir")
+    find({ wanted => \&cleantmp, bydepth => 1, no_chdir => 1 }, $testdir)
 	if $cleanup;
     ok(!$dubiouscount, "dubious files found");
 }
