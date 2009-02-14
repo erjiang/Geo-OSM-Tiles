@@ -15,7 +15,7 @@ if ($@) {
     plan skip_all => "could not reach tile server: $@";
 }
 else {
-    plan tests => 3 * 3 + 8;
+    plan tests => 3 * 3 + 10;
 }
 
 use Cwd qw(abs_path);
@@ -47,6 +47,12 @@ our $testdir = tempdir( CLEANUP => $cleanup );
 our $pngcount;
 our $dubiouscount;
 
+
+# check whether the script is properly placed where we expect it do be
+# and wheter it is executable.
+# 2 tests
+ok(-e $downloadosmtiles, "downloadosmtiles.pl is present");
+ok(-x $downloadosmtiles, "downloadosmtiles.pl is executable");
 
 # download single tiles for a bunch of positions
 # 3 * 3 tests
