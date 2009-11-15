@@ -4,7 +4,7 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     NAME	     => 'Geo::OSM::Tiles',
     ABSTRACT_FROM    => 'lib/Geo/OSM/Tiles.pm', 
-    AUTHOR	     => 'Rolf Krahl <rolf@rotkraut.de>', 
+    AUTHOR	     => 'Rolf Krahl <rotkraut@cpan.org>', 
     VERSION_FROM     => 'lib/Geo/OSM/Tiles.pm', 
     LICENSE	     => "perl", 
     PREREQ_PM	     => { 

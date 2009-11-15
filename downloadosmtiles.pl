@@ -302,7 +302,7 @@ L<http://wiki.openstreetmap.org/wiki/Slippy_Map>
 
 =head1 AUTHOR
 
-Rolf Krahl E<lt>rolf@rotkraut.deE<gt>
+Rolf Krahl E<lt>rotkraut@cpan.orgE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
