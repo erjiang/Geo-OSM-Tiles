@@ -28,6 +28,15 @@ To install this module type the following:
    make install
 
 
+AUTHOR
+
+Rolf Krahl <rotkraut@cpan.org>
+
+The latest release of this module can be found at CPAN, see
+http://search.cpan.org/dist/Geo-OSM-Tiles/.  The project is hostet at
+BerliOS, see the project page at http://geo-osm-tiles.berlios.de/.
+
+
 COPYRIGHT AND LICENCE
 
 Copyright (C) 2008 by Rolf Krahl
