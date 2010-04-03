@@ -26,17 +26,35 @@ This module requires these other modules and libraries:
    File::Temp
    File::Find
 
-Note that all but LWP are core modules in Perl 5.8 and later.
+Note that all but LWP are core modules in Perl 5.8 and later.  In
+order to verify the signature of the distribution, you furthermore
+need
+
+   Module::Signature
 
 
 INSTALLATION
 
 To install this module type the following:
 
+   cpansign -v
    perl Makefile.PL
    make
    make test
    make install
+
+
+SIGNATURE
+
+This distribution is cryptographically signed using the following key:
+
+   pub   1024D/FDCF7486 2010-04-03
+         Key fingerprint = 342E 56B5 F5B3 6A34 9BE3  82DD C1D4 D7E2 FDCF 7486
+   uid                  Rotkraut CPAN Package Signing Key <rotkraut@cpan.org>
+
+You need the Perl module Module::Signature to verify this signature.
+See the instructions in the file SIGNATURE and the man page of
+cpansign for details.
 
 
 AUTHOR
