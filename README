@@ -15,7 +15,18 @@ PREREQUISITES
 
 This module requires these other modules and libraries:
 
+   Math::Trig
    LWP
+   Getopt::Long
+   File::Path
+   File::Basename
+   File::Spec
+   Cwd
+   Test::More
+   File::Temp
+   File::Find
+
+Note that all but LWP are core modules in Perl 5.8 and later.
 
 
 INSTALLATION
@@ -33,7 +44,7 @@ AUTHOR
 Rolf Krahl <rotkraut@cpan.org>
 
 The latest release of this module can be found at CPAN, see
-http://search.cpan.org/dist/Geo-OSM-Tiles/.  The project is hostet at
+http://search.cpan.org/dist/Geo-OSM-Tiles/.  The project is hosted at
 BerliOS, see the project page at http://geo-osm-tiles.berlios.de/.
 
 
