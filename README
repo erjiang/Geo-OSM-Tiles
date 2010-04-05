@@ -35,9 +35,9 @@ need
 
 INSTALLATION
 
-To install this module type the following:
+You might want to verify the signature of the distribution first, see
+below.  To install this module type the following:
 
-   cpansign -v
    perl Makefile.PL
    make
    make test
@@ -52,7 +52,10 @@ This distribution is cryptographically signed using the following key:
          Key fingerprint = 342E 56B5 F5B3 6A34 9BE3  82DD C1D4 D7E2 FDCF 7486
    uid                  Rotkraut CPAN Package Signing Key <rotkraut@cpan.org>
 
-You need the Perl module Module::Signature to verify this signature.
+To verify the signature type the following:
+
+   cpansign -v
+
 See the instructions in the file SIGNATURE and the man page of
 cpansign for details.
 
@@ -68,7 +71,7 @@ BerliOS, see the project page at http://geo-osm-tiles.berlios.de/.
 
 COPYRIGHT AND LICENCE
 
-Copyright (C) 2008 by Rolf Krahl
+Copyright (C) 2008-2010 by Rolf Krahl
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,
