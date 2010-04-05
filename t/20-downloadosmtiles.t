@@ -83,9 +83,12 @@ ok(-x $downloadosmtiles, "downloadosmtiles.pl is executable");
 	my $lat = $_->{LAT};
 	my $lon = $_->{LON};
 	my $zoom = $_->{ZOOM};
-	my $res = system($downloadosmtiles, 
-			 "--latitude=$lat", "--longitude=$lon", "--zoom=$zoom",
-			 "--quiet", "--destdir=$testdir");
+	my @args = ( $downloadosmtiles, 
+		     "--latitude=$lat", "--longitude=$lon", "--zoom=$zoom",
+		     "--quiet", "--destdir=$testdir" );
+	@args = map { "\"$_\"" } @args
+	    if $^O =~ /^mswin/i;
+	my $res = system(@args);
 	is($res, 0, "return value from downloadosmtiles.pl");
 
 	$pngcount = 0;
@@ -104,10 +107,11 @@ ok(-x $downloadosmtiles, "downloadosmtiles.pl is executable");
 # 8 tests
 {
     my $link = 'http://openstreetmap.org/?lat=14.692&lon=-17.448&zoom=11&layers=B000FTF';
-
-    my $res = system($downloadosmtiles, 
-		     "--link=$link", "--zoom=11:13",
-		     "--quiet", "--destdir=$testdir");
+    my @args = ( $downloadosmtiles, "--link=$link", "--zoom=11:13", 
+		 "--quiet", "--destdir=$testdir" );
+    @args = map { "\"$_\"" } @args
+	if $^O =~ /^mswin/i;
+    my $res = system(@args);
     is($res, 0, "return value from downloadosmtiles.pl");
 
     $pngcount = 0;

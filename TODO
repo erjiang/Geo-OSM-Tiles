@@ -1,16 +1,4 @@
 
-* Portability:
-  Allow an alternate separator (maybe ':' instead of '&') in the
-  --link command line argument to downloadosmtiles.pl.  MSWin32 seem
-  to have problems passing command line arguments to a script
-  containing '&'.
-
-  Still have to decide whether we support this silently or add an
-  extra compatibility command line switch to turn this on.
-
-  Document the portability issues revealed by cpan testers in the
-  README.
-
 * Build:
   Support Module::Build as an alternative to ExtUtils::MakeMaker.
 
