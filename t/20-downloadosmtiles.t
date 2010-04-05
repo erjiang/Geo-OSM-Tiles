@@ -1,3 +1,7 @@
+#! /usr/bin/perl
+
+use strict;
+use warnings;
 use Test::More;
 
 # Check whether we can reach the tile server first.  Otherwise it

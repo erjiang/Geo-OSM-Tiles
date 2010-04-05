@@ -1,6 +1,7 @@
-#!/usr/bin/perl
+#! /usr/bin/perl
 
 use strict;
+use warnings;
 use Test::More;
 
 # This test script was taken from Module::Signature version 0.63, see

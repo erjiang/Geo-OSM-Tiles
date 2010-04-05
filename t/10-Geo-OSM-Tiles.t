@@ -1,3 +1,7 @@
+#! /usr/bin/perl
+
+use strict;
+use warnings;
 use Test::More tests => 74;
 BEGIN { use_ok('Geo::OSM::Tiles', qw(:all)) };
 
@@ -42,7 +46,7 @@ BEGIN { use_ok('Geo::OSM::Tiles', qw(:all)) };
     # 39..74
     # A range of coordinates that is out of bounds for sure.
     my @hugerange = (-1000.0, 1000.0);
-    for $zoom (0, 1, 2, 5, 10, 15, 18, 20, 30) {
+    for my $zoom (0, 1, 2, 5, 10, 15, 18, 20, 30) {
 	# 4 tests per zoom level
 	my $max = 2**$zoom-1;
 
