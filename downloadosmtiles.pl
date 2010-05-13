@@ -68,6 +68,36 @@ our ($zoommin, $zoommax) = parseintopt("zoom");
 our $baseurl = $opt{baseurl};
 our $destdir = $opt{destdir};
 
+# List of tiles scheduled for download.
+# Format:
+# %downloadlist = (
+#     zoomlevel => [
+# 	{
+# 	    status => statuscode,
+# 	    xyz => [ tx, ty, tz ],
+# 	},
+# 	{
+# 	    status => statuscode,
+# 	    xyz => [ tx, ty, tz ],
+# 	},
+# 	...
+#     ],
+#     zoomlevel => [
+# 	{
+# 	    status => statuscode,
+# 	    xyz => [ tx, ty, tz ],
+# 	},
+# 	{
+# 	    status => statuscode,
+# 	    xyz => [ tx, ty, tz ],
+# 	},
+# 	...
+#     ],
+#     ...
+# );
+# where statuscode: 0=done, 1=scheduled, 2=failed
+our %downloadlist = ();
+
 for my $zoom ($zoommin..$zoommax) {
 
     my $txmin = lon2tilex($lonmin, $zoom);
@@ -79,14 +109,33 @@ for my $zoom ($zoommin..$zoommax) {
 
     my $ntx = $txmax - $txmin + 1;
     my $nty = $tymax - $tymin + 1;
-    printf "Download %d (%d x %d) tiles for zoom level %d ...\n",
+    printf "Schedule %d (%d x %d) tiles for zoom level %d for download ...\n",
 	$ntx*$nty, $ntx, $nty, $zoom
 	unless $opt{quiet};
+    $downloadlist{$zoom} = [];    
 
     for my $tx ($txmin..$txmax) {
 	for my $ty ($tymin..$tymax) {
-	    downloadtile($lwpua, $tx, $ty, $zoom);
+	    push @{$downloadlist{$zoom}}, 
+		{ status => 1, xyz => [ $tx, $ty, $zoom ] };
 	}
+    }
+}
+
+for my $zoom (sort {$a <=> $b} keys %downloadlist) {
+
+    printf "Download %d tiles for zoom level %d ...\n",
+	scalar(@{$downloadlist{$zoom}}), $zoom
+	unless $opt{quiet};
+
+    for my $t (@{$downloadlist{$zoom}}) {
+	next unless $t->{status};
+	downloadtile($lwpua, @{$t->{xyz}});
+	# Setting the status at this point might not have any sense as
+	# it is never checked again.  But in a future version we might
+	# recover from errors and distinguish between successful and
+	# unsuccessful downloads later on.
+	$t->{status} = 0;
     }
 }
 
