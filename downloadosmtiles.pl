@@ -5,6 +5,7 @@ use strict;
 use warnings;
 use Geo::OSM::Tiles qw( :all );
 use LWP::UserAgent;
+use YAML qw( DumpFile LoadFile );
 use File::Path;
 use File::Basename;
 use File::Spec;
@@ -14,8 +15,9 @@ use Getopt::Long;
 our $linkrgoffs = 350.0;
 
 our $usage = qq{Usage: 
-   $0 --latitude=d[:d] --longitude=d[:d] --zoom=z[:z] [--quiet] [--baseurl=url] [--destdir=dir]
-   $0 --link=url [--latitude=d[:d]] [--longitude=d[:d]] [--zoom=z[:z]] [--quiet] [--baseurl=url] [--destdir=dir]
+   $0 --latitude=d[:d] --longitude=d[:d] --zoom=z[:z] [--quiet] [--baseurl=url] [--destdir=dir] [--dumptilelist=filename]
+   $0 --link=url [--latitude=d[:d]] [--longitude=d[:d]] [--zoom=z[:z]] [--quiet] [--baseurl=url] [--destdir=dir] [--dumptilelist=filename]
+   $0 --loadtilelist=filename
 };
 
 our %opt = (
@@ -26,51 +28,27 @@ our %opt = (
     quiet => undef,
     baseurl => "http://tile.openstreetmap.org",
     destdir => cwd,
+    dumptilelist => undef,
+    loadtilelist => undef,
 );
 
 die "$usage\n"
     unless GetOptions(\%opt,
-                      "latitude=s", "longitude=s", "zoom=s", "link=s",
-                      "quiet", "baseurl=s", "destdir=s") &&
-           @ARGV == 0;
+		      "latitude=s", "longitude=s", "zoom=s", "link=s",
+		      "quiet", "baseurl=s", "destdir=s", 
+		      "dumptilelist=s", "loadtilelist=s") &&
+	   @ARGV == 0;
 
+sub selecttilescmdline;
+sub downloadtiles;
 sub parserealopt;
 sub parseintopt;
 sub downloadtile;
 
-if ($opt{link}) {
-    die "Invalid link: $opt{link}\n"
-	unless $opt{link} =~ /^http:\/\/.*\/\?lat=(-?\d+(?:\.\d+)?)\&lon=(-?\d+(?:\.\d+)?)\&zoom=(\d+)/;
-    my $lat = $1;
-    my $lon = $2;
-    my $zoom = $3;
-    my $offs = $linkrgoffs / 2**$zoom;
-
-    # Note that ($lat - $offs, $lat + $offs) or
-    # ($lon - $offs, $lon + $offs) may get out of the acceptable range
-    # of coordinates.  This will eventually get corrected by
-    # checklatrange or checklonrange later on.
-
-    $opt{latitude} = [ $lat - $offs, $lat + $offs ]
-	unless defined($opt{latitude});
-    $opt{longitude} = [ $lon - $offs, $lon + $offs ]
-	unless defined($opt{longitude});
-    $opt{zoom} = $zoom
-	unless defined($opt{zoom});
-}
-
-our $lwpua = LWP::UserAgent->new;
-$lwpua->env_proxy;
-
-our ($latmin, $latmax) = checklatrange(parserealopt("latitude"));
-our ($lonmin, $lonmax) = checklonrange(parserealopt("longitude"));
-our ($zoommin, $zoommax) = parseintopt("zoom");
-our $baseurl = $opt{baseurl};
-our $destdir = $opt{destdir};
 
 # List of tiles scheduled for download.
 # Format:
-# %downloadlist = (
+# $tilelist = {
 #     zoomlevel => [
 # 	{
 # 	    status => statuscode,
@@ -94,51 +72,115 @@ our $destdir = $opt{destdir};
 # 	...
 #     ],
 #     ...
-# );
+# };
 # where statuscode: 0=done, 1=scheduled, 2=failed
-our %downloadlist = ();
+our $tilelist;
 
-for my $zoom ($zoommin..$zoommax) {
+# In the current version we keep things simple, the tiles have to be
+# selected either by the command line options --link, --lat, --lon,
+# and --zoom or read from the file as given by --loadtilelist.  In a
+# future version, it might be possible to combine both ways.
+if ($opt{loadtilelist}) {
+    $tilelist = LoadFile($opt{loadtilelist});
+}
+else {
+    $tilelist = selecttilescmdline;
+}
 
-    my $txmin = lon2tilex($lonmin, $zoom);
-    my $txmax = lon2tilex($lonmax, $zoom);
-    # Note that y=0 is near lat=+85.0511 and y=max is near
-    # lat=-85.0511, so lat2tiley is monotonically decreasing.
-    my $tymin = lat2tiley($latmax, $zoom);
-    my $tymax = lat2tiley($latmin, $zoom);
+our $baseurl = $opt{baseurl};
+our $destdir = $opt{destdir};
 
-    my $ntx = $txmax - $txmin + 1;
-    my $nty = $tymax - $tymin + 1;
-    printf "Schedule %d (%d x %d) tiles for zoom level %d for download ...\n",
-	$ntx*$nty, $ntx, $nty, $zoom
-	unless $opt{quiet};
-    $downloadlist{$zoom} = [];    
+if ($opt{dumptilelist}) {
+    DumpFile($opt{dumptilelist}, $tilelist);
+}
+else {
+    downloadtiles($tilelist);
+}
 
-    for my $tx ($txmin..$txmax) {
-	for my $ty ($tymin..$tymax) {
-	    push @{$downloadlist{$zoom}}, 
-		{ status => 1, xyz => [ $tx, $ty, $zoom ] };
+
+
+# Select tiles from command line options
+sub selecttilescmdline
+{
+    if ($opt{link}) {
+	die "Invalid link: $opt{link}\n"
+	    unless $opt{link} =~ /^http:\/\/.*\/\?lat=(-?\d+(?:\.\d+)?)\&lon=(-?\d+(?:\.\d+)?)\&zoom=(\d+)/;
+	my $lat = $1;
+	my $lon = $2;
+	my $zoom = $3;
+	my $offs = $linkrgoffs / 2**$zoom;
+
+	# Note that ($lat - $offs, $lat + $offs) or
+	# ($lon - $offs, $lon + $offs) may get out of the acceptable
+	# range of coordinates.  This will eventually get corrected by
+	# checklatrange or checklonrange later on.
+
+	$opt{latitude} = [ $lat - $offs, $lat + $offs ]
+	    unless defined($opt{latitude});
+	$opt{longitude} = [ $lon - $offs, $lon + $offs ]
+	    unless defined($opt{longitude});
+	$opt{zoom} = $zoom
+	    unless defined($opt{zoom});
+    }
+
+    my ($latmin, $latmax) = checklatrange(parserealopt("latitude"));
+    my ($lonmin, $lonmax) = checklonrange(parserealopt("longitude"));
+    my ($zoommin, $zoommax) = parseintopt("zoom");
+
+    my $tl = {};
+
+    for my $zoom ($zoommin..$zoommax) {
+
+	my $txmin = lon2tilex($lonmin, $zoom);
+	my $txmax = lon2tilex($lonmax, $zoom);
+	# Note that y=0 is near lat=+85.0511 and y=max is near
+	# lat=-85.0511, so lat2tiley is monotonically decreasing.
+	my $tymin = lat2tiley($latmax, $zoom);
+	my $tymax = lat2tiley($latmin, $zoom);
+
+	my $ntx = $txmax - $txmin + 1;
+	my $nty = $tymax - $tymin + 1;
+	printf "Schedule %d (%d x %d) tiles for zoom level %d for download ...\n",
+	       $ntx*$nty, $ntx, $nty, $zoom
+	    unless $opt{quiet};
+	$tl->{$zoom} = [];    
+
+	for my $tx ($txmin..$txmax) {
+	    for my $ty ($tymin..$tymax) {
+		push @{$tl->{$zoom}}, 
+		    { status => 1, xyz => [ $tx, $ty, $zoom ] };
+	    }
+	}
+    }
+
+    return $tl;
+}
+
+
+sub downloadtiles
+{
+    my $tiles = shift;
+
+    my $lwpua = LWP::UserAgent->new;
+    $lwpua->env_proxy;
+
+    for my $zoom (sort {$a <=> $b} keys %$tiles) {
+
+	printf "Download %d tiles for zoom level %d ...\n",
+	       scalar(@{$tiles->{$zoom}}), $zoom
+	    unless $opt{quiet};
+
+	for my $t (@{$tiles->{$zoom}}) {
+	    next unless $t->{status};
+	    downloadtile($lwpua, @{$t->{xyz}});
+	    # Setting the status at this point might not have any
+	    # sense as it is never checked again.  But in a future
+	    # version we might recover from errors and distinguish
+	    # between successful and unsuccessful downloads later on.
+	    $t->{status} = 0;
 	}
     }
 }
-
-for my $zoom (sort {$a <=> $b} keys %downloadlist) {
-
-    printf "Download %d tiles for zoom level %d ...\n",
-	scalar(@{$downloadlist{$zoom}}), $zoom
-	unless $opt{quiet};
-
-    for my $t (@{$downloadlist{$zoom}}) {
-	next unless $t->{status};
-	downloadtile($lwpua, @{$t->{xyz}});
-	# Setting the status at this point might not have any sense as
-	# it is never checked again.  But in a future version we might
-	# recover from errors and distinguish between successful and
-	# unsuccessful downloads later on.
-	$t->{status} = 0;
-    }
-}
-
 
 
 sub parserealopt
@@ -207,6 +249,7 @@ downloadosmtiles.pl - Download map tiles from OpenStreetMap
 
   downloadosmtiles.pl --lat=49.5611:49.6282 --lon=10.951:11.0574 --zoom=13:14
   downloadosmtiles.pl --link='http://www.openstreetmap.org/?lat=-23.5872&lon=-46.6508&zoom=12&layers=B000FTF'
+  downloadosmtiles.pl --loadtilelist=filename
 
 =head1 DESCRIPTION
 
@@ -292,6 +335,17 @@ Default: The current working directory.
 Do not write any diagnostic messages.  Only fatal errors will be
 reported.
 
+=head2 C<--dumptilelist=filename>
+
+Do not download any tiles at all, but write a list of tiles as
+selected by other command line options to the file named C<filename>.
+See L</TILE LISTS> below.
+
+=head2 C<--loadtilelist=filename>
+
+Read a list of tiles to download from the file C<filename>.  See
+L</TILE LISTS> below.
+
 =head1 EXAMPLE
 
 Select the region of interest in OSM's slippy map and follow the
@@ -303,6 +357,24 @@ Then
   downloadosmtiles.pl --link='http://www.openstreetmap.org/?lat=49.5782&lon=11.0076&zoom=12&layers=B000FTF' --zoom=5:18
 
 will download all tiles from zoom level 5 to 18 for this region.
+
+=head1 TILE LISTS
+
+A list of tiles may be stored to and retrieved from external files
+using the C<--dumptilelist> and C<--loadtilelist> command line
+options.  A set of tiles may be selected using the command line
+options C<--latitude>, C<--longitude>, C<--zoom>, and C<--link> and
+written to a file specified with C<--dumptilelist>.  This list may be
+read at a later date using the C<--loadtilelist> option.
+
+This may be useful to postpone the download of the tiles, to edit the
+list of tiles, or to use some external tool to generate this list.
+
+The tile lists are read and written in L<YAML> format.  Please note
+that this is an experimental feature in the current version.  The file
+format is not considered stable yet.  There is no guarantee that a
+list of tiles generated by one version of this script may be read in
+by a future version.
 
 =head1 ENVIRONMENT
 

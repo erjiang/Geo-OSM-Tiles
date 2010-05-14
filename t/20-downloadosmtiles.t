@@ -19,7 +19,7 @@ if ($@) {
     plan skip_all => "could not reach tile server: $@";
 }
 else {
-    plan tests => 3 * 3 + 9;
+    plan tests => 3 * 3 + 16;
 }
 
 use Config;
@@ -27,6 +27,7 @@ use Cwd qw(abs_path);
 use File::Temp qw(tempdir);
 use File::Spec;
 use File::Find;
+use YAML qw( DumpFile LoadFile );
 
 # you may switch off $cleanup for debugging this test script.
 our $cleanup = 1;
@@ -50,6 +51,7 @@ sub cleantmp;
 
 our $perl = $Config{perlpath};
 our $testdir = tempdir( CLEANUP => $cleanup );
+our $tilelistfile = File::Spec->catdir($testdir, "tilelist");
 our $pngcount;
 our $dubiouscount;
 
@@ -130,6 +132,79 @@ ok(-e $downloadosmtiles, "downloadosmtiles.pl is present");
     find(\&countpng, File::Spec->catdir($testdir, "13"));
     cmp_ok($pngcount, '>=', $oldcount, "number of dowloaded tiles");
     cmp_ok($pngcount, '<=', 4*$oldcount, "number of dowloaded tiles");
+
+    $dubiouscount = 0;
+    find({ wanted => \&cleantmp, bydepth => 1, no_chdir => 1 }, $testdir)
+	if $cleanup;
+    ok(!$dubiouscount, "dubious files found");
+}
+
+
+# test --dumptilelist option
+# 3 tests
+{
+    my @args = ( $downloadosmtiles, 
+		 "--lat=51.5908:51.5974", "--lon=9.9537:9.9645", 
+		 "--zoom=15:16", "--dumptilelist=$tilelistfile",
+		 "--quiet" );
+    @args = map { "\"$_\"" } @args
+	if $^O =~ /^mswin/i;
+    my $res = system($perl, @args);
+    is($res, 0, "return value from downloadosmtiles.pl");
+
+    my $expectedtilelist = {
+	15 => [
+	    {
+		status => 1,
+		xyz => [ 17290, 10883, 15 ],
+	    },
+	],
+	16 => [
+	    {
+		status => 1,
+		xyz => [ 34580, 21766, 16 ],
+	    },
+	    {
+		status => 1,
+		xyz => [ 34580, 21767, 16 ],
+	    },
+	    {
+		status => 1,
+		xyz => [ 34581, 21766, 16 ],
+	    },
+	    {
+		status => 1,
+		xyz => [ 34581, 21767, 16 ],
+	    },
+	],
+    };
+    my $tilelist = LoadFile($tilelistfile);
+    isa_ok( $tilelist, 'HASH', "loaded tile list" );
+    is_deeply( $tilelist, $expectedtilelist, "loaded tile list" );
+}
+
+
+# test --loadtilelist option
+# 4 tests
+{
+    my @args = ( $downloadosmtiles, 
+		 "--loadtilelist=$tilelistfile",
+		 "--quiet", "--destdir=$testdir" );
+    @args = map { "\"$_\"" } @args
+	if $^O =~ /^mswin/i;
+    my $res = system($perl, @args);
+    is($res, 0, "return value from downloadosmtiles.pl");
+
+    # We loaded the tile list created by the --dumptilelist test
+    # above.  We should find the tiles as listed in $expectedtilelist
+    # downloaded to $testdir now.
+    $pngcount = 0;
+    find(\&countpng, File::Spec->catdir($testdir, 15));
+    is($pngcount, 1, "number of dowloaded tiles");
+
+    $pngcount = 0;
+    find(\&countpng, File::Spec->catdir($testdir, 16));
+    is($pngcount, 4, "number of dowloaded tiles");
 
     $dubiouscount = 0;
     find({ wanted => \&cleantmp, bydepth => 1, no_chdir => 1 }, $testdir)
