@@ -19,7 +19,7 @@ if ($@) {
     plan skip_all => "could not reach tile server: $@";
 }
 else {
-    plan tests => 3 * 3 + 16;
+    plan tests => 3 * 3 + 19;
 }
 
 use Config;
@@ -51,7 +51,7 @@ sub cleantmp;
 
 our $perl = $Config{perlpath};
 our $testdir = tempdir( CLEANUP => $cleanup );
-our $tilelistfile = File::Spec->catdir($testdir, "tilelist");
+our $tilelistfile = File::Spec->catfile($testdir, "tilelist");
 our $pngcount;
 our $dubiouscount;
 
@@ -61,8 +61,11 @@ our $dubiouscount;
 ok(-e $downloadosmtiles, "downloadosmtiles.pl is present");
 
 # download single tiles for a bunch of positions
-# 3 * 3 tests
+# 3 * 3 + 1 tests
 {
+    my $subtestdir = File::Spec->catdir($testdir, "t1");
+    ok( mkdir($subtestdir), "create subtestdir" );
+
     my @positions = (
 	{
 	    LAT => "0",
@@ -87,18 +90,18 @@ ok(-e $downloadosmtiles, "downloadosmtiles.pl is present");
 	my $zoom = $_->{ZOOM};
 	my @args = ( $downloadosmtiles, 
 		     "--latitude=$lat", "--longitude=$lon", "--zoom=$zoom",
-		     "--quiet", "--destdir=$testdir" );
+		     "--quiet", "--destdir=$subtestdir" );
 	@args = map { "\"$_\"" } @args
 	    if $^O =~ /^mswin/i;
 	my $res = system($perl, @args);
 	is($res, 0, "return value from downloadosmtiles.pl");
 
 	$pngcount = 0;
-	find(\&countpng, File::Spec->catdir($testdir, $zoom));
+	find(\&countpng, File::Spec->catdir($subtestdir, $zoom));
 	is($pngcount, 1, "number of dowloaded tiles");
 
 	$dubiouscount = 0;
-	find({ wanted => \&cleantmp, bydepth => 1, no_chdir => 1 }, $testdir)
+	find({ wanted => \&cleantmp, bydepth => 1, no_chdir => 1 }, $subtestdir)
 	    if $cleanup;
 	ok(!$dubiouscount, "dubious files found");
     }
@@ -106,35 +109,38 @@ ok(-e $downloadosmtiles, "downloadosmtiles.pl is present");
 
 
 # test --link option
-# 8 tests
+# 9 tests
 {
+    my $subtestdir = File::Spec->catdir($testdir, "t2");
+    ok( mkdir($subtestdir), "create subtestdir" );
+
     my $link = 'http://openstreetmap.org/?lat=14.692&lon=-17.448&zoom=11&layers=B000FTF';
     my @args = ( $downloadosmtiles, "--link=$link", "--zoom=11:13", 
-		 "--quiet", "--destdir=$testdir" );
+		 "--quiet", "--destdir=$subtestdir" );
     @args = map { "\"$_\"" } @args
 	if $^O =~ /^mswin/i;
     my $res = system($perl, @args);
     is($res, 0, "return value from downloadosmtiles.pl");
 
     $pngcount = 0;
-    find(\&countpng, File::Spec->catdir($testdir, "11"));
+    find(\&countpng, File::Spec->catdir($subtestdir, "11"));
     cmp_ok($pngcount, '>=', 9, "number of dowloaded tiles");
     cmp_ok($pngcount, '<=', 16, "number of dowloaded tiles");
 
     my $oldcount = $pngcount;
     $pngcount = 0;
-    find(\&countpng, File::Spec->catdir($testdir, "12"));
+    find(\&countpng, File::Spec->catdir($subtestdir, "12"));
     cmp_ok($pngcount, '>=', $oldcount, "number of dowloaded tiles");
     cmp_ok($pngcount, '<=', 4*$oldcount, "number of dowloaded tiles");
 
     $oldcount = $pngcount;
     $pngcount = 0;
-    find(\&countpng, File::Spec->catdir($testdir, "13"));
+    find(\&countpng, File::Spec->catdir($subtestdir, "13"));
     cmp_ok($pngcount, '>=', $oldcount, "number of dowloaded tiles");
     cmp_ok($pngcount, '<=', 4*$oldcount, "number of dowloaded tiles");
 
     $dubiouscount = 0;
-    find({ wanted => \&cleantmp, bydepth => 1, no_chdir => 1 }, $testdir)
+    find({ wanted => \&cleantmp, bydepth => 1, no_chdir => 1 }, $subtestdir)
 	if $cleanup;
     ok(!$dubiouscount, "dubious files found");
 }
@@ -185,11 +191,14 @@ ok(-e $downloadosmtiles, "downloadosmtiles.pl is present");
 
 
 # test --loadtilelist option
-# 4 tests
+# 5 tests
 {
+    my $subtestdir = File::Spec->catdir($testdir, "t4");
+    ok( mkdir($subtestdir), "create subtestdir" );
+
     my @args = ( $downloadosmtiles, 
 		 "--loadtilelist=$tilelistfile",
-		 "--quiet", "--destdir=$testdir" );
+		 "--quiet", "--destdir=$subtestdir" );
     @args = map { "\"$_\"" } @args
 	if $^O =~ /^mswin/i;
     my $res = system($perl, @args);
@@ -197,17 +206,17 @@ ok(-e $downloadosmtiles, "downloadosmtiles.pl is present");
 
     # We loaded the tile list created by the --dumptilelist test
     # above.  We should find the tiles as listed in $expectedtilelist
-    # downloaded to $testdir now.
+    # downloaded to $subtestdir now.
     $pngcount = 0;
-    find(\&countpng, File::Spec->catdir($testdir, 15));
+    find(\&countpng, File::Spec->catdir($subtestdir, 15));
     is($pngcount, 1, "number of dowloaded tiles");
 
     $pngcount = 0;
-    find(\&countpng, File::Spec->catdir($testdir, 16));
+    find(\&countpng, File::Spec->catdir($subtestdir, 16));
     is($pngcount, 4, "number of dowloaded tiles");
 
     $dubiouscount = 0;
-    find({ wanted => \&cleantmp, bydepth => 1, no_chdir => 1 }, $testdir)
+    find({ wanted => \&cleantmp, bydepth => 1, no_chdir => 1 }, $subtestdir)
 	if $cleanup;
     ok(!$dubiouscount, "dubious files found");
 }
