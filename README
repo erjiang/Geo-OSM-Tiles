@@ -18,6 +18,7 @@ This module requires these other modules and libraries:
    Math::Trig
    LWP
    Getopt::Long
+   YAML
    File::Path
    File::Basename
    File::Spec
@@ -26,8 +27,8 @@ This module requires these other modules and libraries:
    File::Temp
    File::Find
 
-Note that all but LWP are core modules in Perl 5.8 and later.  In
-order to verify the signature of the distribution, you furthermore
+Note that all but LWP and YAML are core modules in Perl 5.8 and later.
+In order to verify the signature of the distribution, you furthermore
 need
 
    Module::Signature
