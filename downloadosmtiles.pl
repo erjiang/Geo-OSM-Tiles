@@ -51,29 +51,24 @@ sub downloadtile;
 # $tilelist = {
 #     zoomlevel => [
 # 	{
-# 	    status => statuscode,
 # 	    xyz => [ tx, ty, tz ],
 # 	},
 # 	{
-# 	    status => statuscode,
 # 	    xyz => [ tx, ty, tz ],
 # 	},
 # 	...
 #     ],
 #     zoomlevel => [
 # 	{
-# 	    status => statuscode,
 # 	    xyz => [ tx, ty, tz ],
 # 	},
 # 	{
-# 	    status => statuscode,
 # 	    xyz => [ tx, ty, tz ],
 # 	},
 # 	...
 #     ],
 #     ...
 # };
-# where statuscode: 0=done, 1=scheduled, 2=failed
 our $tilelist;
 
 # In the current version we keep things simple, the tiles have to be
@@ -148,7 +143,7 @@ sub selecttilescmdline
 	for my $tx ($txmin..$txmax) {
 	    for my $ty ($tymin..$tymax) {
 		push @{$tl->{$zoom}}, 
-		    { status => 1, xyz => [ $tx, $ty, $zoom ] };
+		    { xyz => [ $tx, $ty, $zoom ] };
 	    }
 	}
     }
@@ -171,13 +166,7 @@ sub downloadtiles
 	    unless $opt{quiet};
 
 	for my $t (@{$tiles->{$zoom}}) {
-	    next unless $t->{status};
 	    downloadtile($lwpua, @{$t->{xyz}});
-	    # Setting the status at this point might not have any
-	    # sense as it is never checked again.  But in a future
-	    # version we might recover from errors and distinguish
-	    # between successful and unsuccessful downloads later on.
-	    $t->{status} = 0;
 	}
     }
 }

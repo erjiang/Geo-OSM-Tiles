@@ -161,25 +161,20 @@ ok(-e $downloadosmtiles, "downloadosmtiles.pl is present");
     my $expectedtilelist = {
 	15 => [
 	    {
-		status => 1,
 		xyz => [ 17290, 10883, 15 ],
 	    },
 	],
 	16 => [
 	    {
-		status => 1,
 		xyz => [ 34580, 21766, 16 ],
 	    },
 	    {
-		status => 1,
 		xyz => [ 34580, 21767, 16 ],
 	    },
 	    {
-		status => 1,
 		xyz => [ 34581, 21766, 16 ],
 	    },
 	    {
-		status => 1,
 		xyz => [ 34581, 21767, 16 ],
 	    },
 	],
