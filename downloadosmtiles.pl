@@ -335,7 +335,23 @@ See L</TILE LISTS> below.
 Read a list of tiles to download from the file C<filename>.  See
 L</TILE LISTS> below.
 
-=head1 EXAMPLE
+=head1 EXAMPLES
+
+=over
+
+=item *
+
+Imagine you want to download the map tiles covering the city center of
+Paris, lets say the rectangle spanning from 48 degree 50 min. 12.5
+sec. N (= 48.8368 N) to 48 degree 52 min. 19.2 sec. N (= 48.8720 N)
+and from 2 degree 19 min. 0.1 sec. E (= 2.3167 E) to 2 degree 22
+min. 8.8 sec. E (= 2.3691 E).  Then
+
+  downloadosmtiles.pl --latitude=48.8368:48.8720 --longitude=2.3167:2.3691 --zoom=10:17
+
+will download all tiles from zoom level 10 to 17 for this area.
+
+=item *
 
 Select the region of interest in OSM's slippy map and follow the
 permalink in the lower left of the window.  Lets assume this permalink
@@ -346,6 +362,8 @@ Then
   downloadosmtiles.pl --link='http://www.openstreetmap.org/?lat=49.5782&lon=11.0076&zoom=12&layers=B000FTF' --zoom=5:18
 
 will download all tiles from zoom level 5 to 18 for this region.
+
+=back
 
 =head1 TILE LISTS
 
