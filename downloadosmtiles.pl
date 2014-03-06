@@ -11,12 +11,13 @@ use File::Basename;
 use File::Spec;
 use Cwd qw(cwd);
 use Getopt::Long;
+use Parallel::Loops;
 
 our $linkrgoffs = 350.0;
 
 our $usage = qq{Usage: 
-   $0 --latitude=d[:d] --longitude=d[:d] --zoom=z[:z] [--quiet] [--baseurl=url] [--destdir=dir] [--dumptilelist=filename]
-   $0 --link=url [--latitude=d[:d]] [--longitude=d[:d]] [--zoom=z[:z]] [--quiet] [--baseurl=url] [--destdir=dir] [--dumptilelist=filename]
+   $0 --latitude=d[:d] --longitude=d[:d] --zoom=z[:z] [--quiet] [--baseurl=url] [--destdir=dir] [--dumptilelist=filename] [--parallel=p]
+   $0 --link=url [--latitude=d[:d]] [--longitude=d[:d]] [--zoom=z[:z]] [--quiet] [--baseurl=url] [--destdir=dir] [--dumptilelist=filename] [--parallel=p]
    $0 --loadtilelist=filename
 };
 
@@ -30,13 +31,14 @@ our %opt = (
     destdir => cwd,
     dumptilelist => undef,
     loadtilelist => undef,
+    parallel => 1,
 );
 
 die "$usage\n"
     unless GetOptions(\%opt,
 		      "latitude=s", "longitude=s", "zoom=s", "link=s",
 		      "quiet", "baseurl=s", "destdir=s", 
-		      "dumptilelist=s", "loadtilelist=s") &&
+		      "dumptilelist=s", "loadtilelist=s", "parallel=s") &&
 	   @ARGV == 0;
 
 sub selecttilescmdline;
@@ -91,6 +93,8 @@ if ($opt{dumptilelist}) {
 else {
     downloadtiles($tilelist);
 }
+
+our $maxProcs = $opt{parallel}
 
 
 
@@ -154,6 +158,7 @@ sub selecttilescmdline
 
 sub downloadtiles
 {
+    my $pl = Parallel::Loops->new($maxProcs);
     my $tiles = shift;
 
     my $lwpua = LWP::UserAgent->new;
@@ -165,9 +170,10 @@ sub downloadtiles
 	       scalar(@{$tiles->{$zoom}}), $zoom
 	    unless $opt{quiet};
 
-	for my $t (@{$tiles->{$zoom}}) {
-	    downloadtile($lwpua, @{$t->{xyz}});
-	}
+        $pl->foreach($tiles->{$zoom}, sub {
+            my $t = $_;
+            downloadtile($lwpua, @{$t->{xyz}});
+        }
     }
 }
 
