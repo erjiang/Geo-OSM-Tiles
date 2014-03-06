@@ -27,6 +27,7 @@ our %opt = (
     zoom => undef,
     link => undef,
     quiet => undef,
+    skipexisting => undef,
     baseurl => "http://tile.openstreetmap.org",
     destdir => cwd,
     dumptilelist => undef,
@@ -38,7 +39,8 @@ die "$usage\n"
     unless GetOptions(\%opt,
 		      "latitude=s", "longitude=s", "zoom=s", "link=s",
 		      "quiet", "baseurl=s", "destdir=s", 
-		      "dumptilelist=s", "loadtilelist=s", "parallel=s") &&
+		      "dumptilelist=s", "loadtilelist=s", "parallel=s",
+		      "skipexisting") &&
 	   @ARGV == 0;
 
 sub selecttilescmdline;
@@ -95,6 +97,8 @@ else {
 }
 
 our $maxProcs = $opt{parallel}
+
+our $skipexisting = $opt{skipexisting}
 
 
 
@@ -227,6 +231,11 @@ sub downloadtile
     my $url = "$baseurl/$path";
     my @pathcomp = split /\//, $path;
     my $fname = File::Spec->catfile($destdir, @pathcomp);
+
+    if ($skipexisting && -e $fname) {
+        print("Skipping $name\n");
+        return;
+    }
 
     mkpath(dirname($fname));
     my $res = $lwpua->get($url, ':content_file' => $fname);
